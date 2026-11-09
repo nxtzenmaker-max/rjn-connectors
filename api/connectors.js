@@ -121,6 +121,54 @@ const CONNECTORS = [
         required: ['repo']
       }
     }
+  },
+  {
+    id: 'runner',
+    name: 'Railway Cloud Command Runner',
+    icon: '⚡',
+    category: 'Execution',
+    description: 'Execute arbitrary bash shell commands, terminal tools, or Python scripts on dedicated cloud Linux server.',
+    endpoint: '/api/runner',
+    methods: ['POST', 'GET'],
+    parameters: {
+      command: { type: 'string', description: 'Bash shell command to execute', required: true }
+    },
+    voiceToolSchema: {
+      name: 'execute_command',
+      description: 'Execute arbitrary bash shell commands or python scripts on dedicated cloud Linux server (Railway) and return stdout/stderr',
+      parameters: {
+        type: 'object',
+        properties: {
+          command: { type: 'string', description: 'The exact Linux bash command or python script to execute' }
+        },
+        required: ['command']
+      }
+    }
+  },
+  {
+    id: 'whatsapp',
+    name: 'WhatsApp Baileys Cloud Bridge',
+    icon: '💬',
+    category: 'Communication',
+    description: '24/7 WhatsApp API gateway with Baileys WebSocket, MongoDB Atlas memory sync, pairing code generator, and command execution.',
+    endpoint: '/api/whatsapp',
+    methods: ['GET', 'POST'],
+    parameters: {
+      action: { type: 'string', description: 'status, pair, send, messages', required: false },
+      phone: { type: 'string', description: 'Phone number with country code for pairing (e.g. 91808797688)', required: false }
+    },
+    voiceToolSchema: {
+      name: 'send_whatsapp_message',
+      description: 'Send a WhatsApp message to any phone number or check WhatsApp linking status',
+      parameters: {
+        type: 'object',
+        properties: {
+          to: { type: 'string', description: 'Destination phone number with country code' },
+          message: { type: 'string', description: 'Message content to send' }
+        },
+        required: ['to', 'message']
+      }
+    }
   }
 ];
 
