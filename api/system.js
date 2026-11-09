@@ -10,11 +10,11 @@ module.exports = (req, res) => {
   const tz = req.query.tz || (req.body && req.body.tz) || 'Asia/Kolkata';
 
   if (action === 'calculate') {
-    const expr = req.query.expr || (req.body && req.body.expr) || '';
+    const expr = (req.query.expr || req.query.expression || (req.body && (req.body.expr || req.body.expression)) || '').trim();
     if (!expr) {
-      return res.status(400).json({ success: false, error: 'expr parameter is required for calculation' });
+      return res.status(400).json({ success: false, error: 'expr or expression parameter is required for calculation' });
     }
-    // Safe mathematical evaluation (only digits, operators, parens)
+    // Safe mathematical evaluation (only digits, operators, parens, decimal, percent, power)
     if (!/^[0-9+\-*/().\s%^]+$/.test(expr)) {
       return res.status(400).json({ success: false, error: 'Invalid or unsafe mathematical expression' });
     }
