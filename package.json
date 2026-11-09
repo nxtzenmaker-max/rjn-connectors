@@ -1,0 +1,21 @@
+{
+  "name": "rjn-connectors",
+  "version": "1.0.0",
+  "description": "High-Performance Universal Connectors & Tool Hub for RJN Hologram AI",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "vercel dev"
+  },
+  "keywords": [
+    "rjn",
+    "connectors",
+    "deepgram",
+    "voice-agent",
+    "ai-tools",
+    "vercel",
+    "api-hub"
+  ],
+  "author": "nxtzenmaker-max",
+  "license": "MIT"
+}
