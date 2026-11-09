@@ -2,6 +2,8 @@
 const APPWRITE_ENDPOINT = 'https://sgp.cloud.appwrite.io/v1/functions/rjn-sync/executions';
 const APPWRITE_PROJECT_ID = '6af08cee002c1c5b2882';
 const RAILWAY_WHATSAPP_URL = 'https://rjn-whatsapp-production.up.railway.app';
+const RAILWAY_RUNNER_URL = 'https://rjn-runner-production.up.railway.app';
+const RUNNER_SECRET_KEY = 'rjn_live_runner_9a8b7c6d5e4f3a2b1';
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -57,7 +59,75 @@ module.exports = async (req, res) => {
       }
     }
 
-    // 3. Hologram Speech Turns Sync via Appwrite
+    // 3. Save or Search Contacts in MongoDB Atlas
+    if (action === 'save_contact') {
+      const name = req.body?.name || req.query.name || 'Unknown';
+      const phone = req.body?.phone || req.query.phone || '';
+      const relation = req.body?.relation || req.query.relation || '';
+      const safeName = name.replace(/"/g, '\\"');
+      const safePhone = phone.replace(/"/g, '\\"');
+      const safeRel = relation.replace(/"/g, '\\"');
+      const cmd = `python3 /root/mongo_tool.py save_contact "${safeName}" "${safePhone}" "${safeRel}"`;
+      const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd, timeout: 20000 })
+      });
+      const runData = await runResp.json();
+      let parsed = null;
+      try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+      return res.status(200).json({ success: true, action: 'save_contact', result: parsed });
+    }
+
+    if (action === 'get_contacts' || action === 'contacts' || action === 'search_contacts') {
+      const query = req.body?.query || req.query.query || '';
+      const safeQ = query.replace(/"/g, '\\"');
+      const cmd = `python3 /root/mongo_tool.py get_contacts "${safeQ}"`;
+      const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd, timeout: 20000 })
+      });
+      const runData = await runResp.json();
+      let parsed = null;
+      try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+      return res.status(200).json({ success: true, action: 'get_contacts', result: parsed });
+    }
+
+    // 4. Custom Persistent Memory Key-Value
+    if (action === 'save_memory') {
+      const key = req.body?.key || req.query.key || 'note';
+      const value = req.body?.value || req.query.value || '';
+      const safeK = key.replace(/"/g, '\\"');
+      const safeV = value.replace(/"/g, '\\"');
+      const cmd = `python3 /root/mongo_tool.py save_memory "${safeK}" "${safeV}"`;
+      const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd, timeout: 20000 })
+      });
+      const runData = await runResp.json();
+      let parsed = null;
+      try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+      return res.status(200).json({ success: true, action: 'save_memory', result: parsed });
+    }
+
+    if (action === 'get_memory') {
+      const key = req.body?.key || req.query.key || '';
+      const safeK = key.replace(/"/g, '\\"');
+      const cmd = `python3 /root/mongo_tool.py get_memory "${safeK}"`;
+      const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd, timeout: 20000 })
+      });
+      const runData = await runResp.json();
+      let parsed = null;
+      try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+      return res.status(200).json({ success: true, action: 'get_memory', result: parsed });
+    }
+
+    // 5. Hologram Speech Turns Sync via Appwrite
     const payload = {
       action,
       sessionId,

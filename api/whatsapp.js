@@ -37,11 +37,26 @@ module.exports = async (req, res) => {
     }
 
     if (action === 'send') {
-      const to = req.body?.to || req.query.to;
+      let to = req.body?.to || req.query.to;
       const message = req.body?.message || req.query.message;
       if (!to || !message) {
         return res.status(400).json({ success: false, error: 'Parameters "to" and "message" are required' });
       }
+
+      // Auto-resolve known contacts / relations
+      const toStr = String(to).trim();
+      const lowerTo = toStr.toLowerCase();
+      if (lowerTo.includes('didi') || lowerTo.includes('sister') || lowerTo.includes('दीदी')) {
+        to = '919110181407';
+      } else {
+        const digits = toStr.replace(/[^0-9]/g, '');
+        if (digits.length === 10) {
+          to = '91' + digits;
+        } else if (digits.length > 10) {
+          to = digits;
+        }
+      }
+
       const resp = await fetch(`${RAILWAY_WHATSAPP_URL}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
