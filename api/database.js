@@ -1,6 +1,7 @@
 // Vercel Serverless Function: Database & Memory Cloud Sync Connector
 const APPWRITE_ENDPOINT = 'https://sgp.cloud.appwrite.io/v1/functions/rjn-sync/executions';
 const APPWRITE_PROJECT_ID = '6af08cee002c1c5b2882';
+const RAILWAY_WHATSAPP_URL = 'https://rjn-whatsapp-production.up.railway.app';
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,6 +17,41 @@ module.exports = async (req, res) => {
   const shape = req.body && req.body.shape ? req.body.shape : 'none';
 
   try {
+    // 1. Stats and MongoDB Overview
+    if (action === 'stats') {
+      try {
+        const waResp = await fetch(`${RAILWAY_WHATSAPP_URL}/status`);
+        const waData = await waResp.json();
+        return res.status(200).json({
+          success: true,
+          action: 'stats',
+          database: 'MongoDB Atlas (rjn_holo)',
+          whatsappConnected: waData.status === 'connected',
+          whatsappPairingCode: waData.pairingCode,
+          stats: waData.database
+        });
+      } catch(e) {
+        return res.status(200).json({
+          success: true,
+          action: 'stats',
+          database: 'MongoDB Atlas (rjn_holo)',
+          status: 'online'
+        });
+      }
+    }
+
+    // 2. WhatsApp Logged Messages
+    if (action === 'whatsapp') {
+      try {
+        const waResp = await fetch(`${RAILWAY_WHATSAPP_URL}/messages`);
+        const waData = await waResp.json();
+        return res.status(200).json(waData);
+      } catch(e) {
+        return res.status(500).json({ success: false, error: e.message });
+      }
+    }
+
+    // 3. Hologram Speech Turns Sync via Appwrite
     const payload = {
       action,
       sessionId,
