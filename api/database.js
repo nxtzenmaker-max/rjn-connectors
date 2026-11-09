@@ -127,6 +127,52 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: true, action: 'get_memory', result: parsed });
     }
 
+    // 5. Autonomous AGY Worker Actions
+    if (action === 'assign_task' || action === 'assign') {
+      const instruction = req.body?.instruction || req.query.instruction || '';
+      const directory = req.body?.directory || req.query.directory || '';
+      const safeInstr = instruction.replace(/"/g, '\\"');
+      const safeDir = directory.replace(/"/g, '\\"');
+      const cmd = `python3 /root/mongo_tool.py assign_task "${safeInstr}" "${safeDir}"`;
+      const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd, timeout: 20000 })
+      });
+      const runData = await runResp.json();
+      let parsed = null;
+      try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+      return res.status(200).json({ success: true, action: 'assign_task', result: parsed });
+    }
+
+    if (action === 'get_task' || action === 'task_status') {
+      const taskId = req.body?.taskId || req.query.taskId || 'latest';
+      const safeId = taskId.replace(/"/g, '\\"');
+      const cmd = `python3 /root/mongo_tool.py get_task "${safeId}"`;
+      const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd, timeout: 20000 })
+      });
+      const runData = await runResp.json();
+      let parsed = null;
+      try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+      return res.status(200).json({ success: true, action: 'get_task', result: parsed });
+    }
+
+    if (action === 'agent_status' || action === 'worker_status') {
+      const cmd = 'python3 /root/mongo_tool.py agent_status';
+      const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd, timeout: 20000 })
+      });
+      const runData = await runResp.json();
+      let parsed = null;
+      try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+      return res.status(200).json({ success: true, action: 'agent_status', result: parsed });
+    }
+
     // 5. Hologram Speech Turns Sync via Appwrite
     const payload = {
       action,
