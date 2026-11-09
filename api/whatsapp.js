@@ -57,6 +57,18 @@ module.exports = async (req, res) => {
       return res.status(200).json(data);
     }
 
+    if (action === 'contacts') {
+      const resp = await fetch(`${RAILWAY_WHATSAPP_URL}/contacts`);
+      const data = await resp.json();
+      return res.status(200).json(data);
+    }
+
+    if (action === 'chats') {
+      const resp = await fetch(`${RAILWAY_WHATSAPP_URL}/chats`);
+      const data = await resp.json();
+      return res.status(200).json(data);
+    }
+
     // Default: Return API documentation & overview
     return res.status(200).json({
       name: 'RJN WhatsApp API Connector',
