@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const action = req.body && req.body.action ? req.body.action : (req.query.action || 'info');
-  const target = req.body && req.body.to ? req.body.to : (req.query.to || 'rforrjn');
+  const target = req.body && req.body.to ? req.body.to : (req.query.to || (req.query.target || 'rforrjn'));
   const message = req.body && req.body.message ? req.body.message : (req.query.message || '');
 
   try {
@@ -21,6 +21,10 @@ module.exports = async (req, res) => {
       }
       const safeMsg = message.replace(/"/g, '\\"');
       cmd = `python3 /root/instagram_tool.py send "${target}" "${safeMsg}"`;
+    } else if (action === 'threads' || action === 'chats' || action === 'list') {
+      cmd = 'python3 /root/instagram_tool.py threads 10';
+    } else if (action === 'messages' || action === 'dms') {
+      cmd = `python3 /root/instagram_tool.py messages "${target}" 5`;
     }
 
     const runnerResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {

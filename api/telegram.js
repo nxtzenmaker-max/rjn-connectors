@@ -22,6 +22,8 @@ module.exports = async (req, res) => {
       // sanitize and escape message for shell
       const safeMsg = message.replace(/"/g, '\\"');
       cmd = `python3 /root/telegram_tool.py send "${target}" "${safeMsg}"`;
+    } else if (action === 'messages') {
+      cmd = `python3 /root/telegram_tool.py messages "${target}" 5`;
     }
 
     const runnerResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
