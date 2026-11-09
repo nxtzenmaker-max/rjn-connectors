@@ -10,8 +10,14 @@ module.exports = async (req, res) => {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const action = req.body && req.body.action ? req.body.action : (req.query.action || 'health');
-  const sessionId = req.body && req.body.sessionId ? req.body.sessionId : (req.query.sessionId || 'anonymous');
+  let action = req.body && req.body.action ? req.body.action : (req.query.action || 'health');
+  if (action === 'recent' || action === 'memory' || action === 'history') {
+    action = 'get_history';
+  }
+  let sessionId = req.body && req.body.sessionId ? req.body.sessionId : (req.query.sessionId || 'usr_rjn_zeno_main');
+  if (!sessionId || sessionId === 'anonymous') {
+    sessionId = 'usr_rjn_zeno_main';
+  }
   const userMsg = req.body && req.body.userMsg ? req.body.userMsg : '';
   const aiReply = req.body && req.body.aiReply ? req.body.aiReply : '';
   const shape = req.body && req.body.shape ? req.body.shape : 'none';
