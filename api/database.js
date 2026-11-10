@@ -52,6 +52,10 @@ module.exports = async (req, res) => {
     if (action === 'whatsapp') {
       try {
         const waResp = await fetch(`${RAILWAY_WHATSAPP_URL}/messages`);
+        if (!waResp.ok) {
+          const errText = await waResp.text();
+          return res.status(waResp.status).json({ success: false, error: errText.slice(0, 200) });
+        }
         const waData = await waResp.json();
         return res.status(200).json(waData);
       } catch(e) {

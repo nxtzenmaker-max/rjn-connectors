@@ -67,7 +67,24 @@ module.exports = async (req, res) => {
     }
 
     if (action === 'messages') {
-      const resp = await fetch(`${RAILWAY_WHATSAPP_URL}/messages`);
+      const phoneParam = req.body?.phone || req.query?.phone;
+      const limitParam = req.body?.limit || req.query?.limit;
+      let url = `${RAILWAY_WHATSAPP_URL}/messages`;
+      const params = new URLSearchParams();
+      if (phoneParam) params.append('phone', phoneParam);
+      if (limitParam) params.append('limit', limitParam);
+      const qs = params.toString();
+      if (qs) url += `?${qs}`;
+
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        const text = await resp.text();
+        return res.status(resp.status).json({
+          success: false,
+          error: `WhatsApp backend responded with ${resp.status}: ${text.slice(0, 200)}`,
+          backend: RAILWAY_WHATSAPP_URL
+        });
+      }
       const data = await resp.json();
       return res.status(200).json(data);
     }
