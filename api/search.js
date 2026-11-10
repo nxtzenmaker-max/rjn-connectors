@@ -89,12 +89,46 @@ module.exports = async (req, res) => {
       }
     }
 
+    // 4. Live Web Search Scrape Fallback (Products, Reviews, News, Anime, Real-time)
+    if (!abstract) {
+      try {
+        const ddgHtmlUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+        const ddgResp = await fetch(ddgHtmlUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+          }
+        });
+        if (ddgResp.ok) {
+          const html = await ddgResp.text();
+          const snippets = [];
+          const regex = /<a class="result__snippet[^>]*>([\s\S]*?)<\/a>/gi;
+          let match;
+          while ((match = regex.exec(html)) !== null && snippets.length < 3) {
+            let clean = match[1]
+              .replace(/<[^>]+>/g, '')
+              .replace(/&#x27;/g, "'")
+              .replace(/&quot;/g, '"')
+              .replace(/&amp;/g, '&')
+              .replace(/\s+/g, ' ')
+              .trim();
+            if (clean && clean.length > 10) snippets.push(clean);
+          }
+          if (snippets.length > 0) {
+            abstract = snippets.join(' | ');
+            source = 'Web Search';
+          }
+        }
+      } catch (e) {
+        console.warn('DDG HTML scrape failed:', e.message);
+      }
+    }
+
     if (!abstract) {
       return res.status(200).json({
         success: true,
         query,
         found: false,
-        summary: `No immediate encyclopedia summary found for "${query}". Try more specific keywords.`
+        summary: `सीधा वेब परिणाम नहीं मिला।`
       });
     }
 
