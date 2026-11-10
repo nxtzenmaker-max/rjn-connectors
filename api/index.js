@@ -13,6 +13,7 @@ const instagram = require('../lib/instagram');
 const telegram = require('../lib/telegram');
 const execute = require('../lib/execute');
 const connectors = require('../lib/connectors');
+const music = require('../lib/music');
 
 const ROUTES = {
   weather,
@@ -27,7 +28,9 @@ const ROUTES = {
   instagram,
   telegram,
   execute,
-  connectors
+  connectors,
+  music,
+  youtube: music
 };
 
 module.exports = async (req, res) => {
