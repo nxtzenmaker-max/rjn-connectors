@@ -16,6 +16,7 @@ Deploys instantly to **Vercel** with zero-configuration serverless functions and
 | 🗄️ **MongoDB Sync** | `/api/database` | Multi-turn speech sync & cloud memory bridge | Pre-configured Appwrite Bridge |
 | ⏱️ **System & Math** | `/api/system` | Live datetime in any timezone + safe math evaluator | None |
 | 🐙 **GitHub Sync** | `/api/github` | Repository stats, commit history & project status | Optional `GITHUB_TOKEN` |
+| 🎨 **IconScout** | `/api/iconscout` | 1,900+ vector icons, SVGs, real-time previews & IconScout API | None (Built-in) / Optional `ICONSCOUT_CLIENT_ID` |
 | ⚡ **Universal Router**| `/api/execute` | Single dispatch endpoint for AI function calls | Internal Router |
 
 ---

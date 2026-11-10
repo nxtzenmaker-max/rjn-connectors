@@ -169,6 +169,34 @@ const CONNECTORS = [
         required: ['to', 'message']
       }
     }
+  },
+  {
+    id: 'iconscout',
+    name: 'IconScout Vector & Asset Connector',
+    icon: '🎨',
+    category: 'Design & Media',
+    description: 'Search, retrieve, and embed over 1,900+ vector icons, SVGs, and IconScout API design assets with real-time preview and CDN delivery.',
+    endpoint: '/api/iconscout',
+    methods: ['GET', 'POST'],
+    parameters: {
+      query: { type: 'string', description: 'Icon name or search keyword (e.g. rocket, user, home, cloud)', required: false },
+      style: { type: 'string', description: 'line, solid, monochrome, or thinline (default: line)', required: false },
+      category: { type: 'string', description: 'Filter by category (e.g. User Interface, Communication, Arrows)', required: false },
+      action: { type: 'string', description: 'search, svg, get, categories, styles, status', required: false },
+      limit: { type: 'number', description: 'Number of results to return (default: 12)', required: false }
+    },
+    voiceToolSchema: {
+      name: 'search_icons',
+      description: 'Search Icon Scout for vector icons, SVGs, or design symbols by keyword (e.g. rocket, home, lock, bell, phone, heart)',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Icon keyword or search term' },
+          style: { type: 'string', description: 'Style: line, solid, monochrome, or thinline (default: line)' }
+        },
+        required: ['query']
+      }
+    }
   }
 ];
 

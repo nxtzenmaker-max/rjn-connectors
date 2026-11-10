@@ -4,13 +4,15 @@ const searchHandler = require('./search');
 const databaseHandler = require('./database');
 const systemHandler = require('./system');
 const githubHandler = require('./github');
+const iconscoutHandler = require('./iconscout');
 
 const HANDLERS = {
   weather: weatherHandler,
   search: searchHandler,
   database: databaseHandler,
   system: systemHandler,
-  github: githubHandler
+  github: githubHandler,
+  iconscout: iconscoutHandler
 };
 
 module.exports = async (req, res) => {

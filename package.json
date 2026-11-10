@@ -17,5 +17,8 @@
     "api-hub"
   ],
   "author": "nxtzenmaker-max",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@iconscout/unicons": "^4.2.0"
+  }
 }
