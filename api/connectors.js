@@ -197,6 +197,32 @@ const CONNECTORS = [
         required: ['query']
       }
     }
+  },
+  {
+    id: 'image',
+    name: 'Real-Time AI Image Generator',
+    icon: '🎨',
+    category: 'Creative AI',
+    description: 'Instant ultra-high resolution AI image, artwork, illustration, and photo generation using modern Flux and Diffusion models on demand.',
+    endpoint: '/api/image',
+    methods: ['GET', 'POST'],
+    parameters: {
+      prompt: { type: 'string', description: 'Detailed visual description of the image to generate', required: true },
+      width: { type: 'number', description: 'Image width in pixels (default: 1024)', required: false },
+      height: { type: 'number', description: 'Image height in pixels (default: 1024)', required: false },
+      model: { type: 'string', description: 'flux or turbo (default: flux)', required: false }
+    },
+    voiceToolSchema: {
+      name: 'generate_image',
+      description: 'Generate high-resolution AI image, artwork, photo, or wallpaper for Boss based on a descriptive prompt',
+      parameters: {
+        type: 'object',
+        properties: {
+          prompt: { type: 'string', description: 'Detailed English visual prompt describing the scene, style, lighting, and subjects' }
+        },
+        required: ['prompt']
+      }
+    }
   }
 ];
 
