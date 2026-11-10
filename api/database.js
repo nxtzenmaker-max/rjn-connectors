@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({
           success: true,
           action: 'stats',
-          database: 'MongoDB Atlas (rjn_holo)',
+          database: 'Cloud Database (Active)',
           whatsappConnected: waData.status === 'connected',
           whatsappPairingCode: waData.pairingCode,
           stats: waData.database
@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({
           success: true,
           action: 'stats',
-          database: 'MongoDB Atlas (rjn_holo)',
+          database: 'Cloud Database (Active)',
           status: 'online'
         });
       }
@@ -215,7 +215,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       success: true,
       action,
-      database: 'MongoDB Atlas (rjn_holo)',
+      database: 'Cloud Database (Active)',
       bridge: 'Appwrite Serverless Execution',
       result: parsedBody || data
     });

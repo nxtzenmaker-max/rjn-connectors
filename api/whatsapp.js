@@ -123,7 +123,7 @@ module.exports = async (req, res) => {
       version: '1.0.0',
       host: 'Vercel Serverless Gateway',
       backend: RAILWAY_WHATSAPP_URL,
-      database: 'MongoDB Atlas (rjn_holo)',
+      database: 'Cloud Database (Active)',
       actions: ['status', 'pair', 'send', 'messages'],
       endpoints: {
         pair: '/api/whatsapp?action=pair&phone=91808797688',
