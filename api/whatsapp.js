@@ -1,5 +1,7 @@
 // Vercel Serverless Function: RJN WhatsApp Baileys & MongoDB API Proxy
 const RAILWAY_WHATSAPP_URL = 'https://rjn-whatsapp-production.up.railway.app';
+const RAILWAY_RUNNER_URL = 'https://rjn-runner-production.up.railway.app';
+const RUNNER_SECRET_KEY = 'rjn_live_runner_9a8b7c6d5e4f3a2b1';
 const DEFAULT_PHONE = '91808797688';
 
 module.exports = async (req, res) => {
@@ -68,25 +70,39 @@ module.exports = async (req, res) => {
 
     if (action === 'messages') {
       const phoneParam = req.body?.phone || req.query?.phone;
-      const limitParam = req.body?.limit || req.query?.limit;
-      let url = `${RAILWAY_WHATSAPP_URL}/messages`;
-      const params = new URLSearchParams();
-      if (phoneParam) params.append('phone', phoneParam);
-      if (limitParam) params.append('limit', limitParam);
-      const qs = params.toString();
-      if (qs) url += `?${qs}`;
+      const limitParam = req.body?.limit || req.query?.limit || 50;
 
-      const resp = await fetch(url);
-      if (!resp.ok) {
-        const text = await resp.text();
-        return res.status(resp.status).json({
-          success: false,
-          error: `WhatsApp backend responded with ${resp.status}: ${text.slice(0, 200)}`,
-          backend: RAILWAY_WHATSAPP_URL
-        });
+      // 1. Try Railway WhatsApp microservice first (fast-path if endpoint available)
+      try {
+        let url = `${RAILWAY_WHATSAPP_URL}/messages`;
+        const params = new URLSearchParams();
+        if (phoneParam) params.append('phone', phoneParam);
+        if (limitParam) params.append('limit', limitParam);
+        const qs = params.toString();
+        if (qs) url += `?${qs}`;
+
+        const resp = await fetch(url, { signal: AbortSignal.timeout(3000) });
+        if (resp.ok) {
+          const data = await resp.json();
+          return res.status(200).json(data);
+        }
+      } catch (e) {
+        // Fallback to direct MongoDB execution
       }
-      const data = await resp.json();
-      return res.status(200).json(data);
+
+      // 2. Direct high-speed MongoDB retrieval via Railway Cloud Runner
+      const safeQ = String(phoneParam || '').replace(/"/g, '\\"');
+      const safeLim = String(limitParam || 50).replace(/[^0-9]/g, '');
+      const cmd = `python3 /root/mongo_tool.py get_whatsapp_messages "${safeQ}" "${safeLim}"`;
+      const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd, timeout: 20000 })
+      });
+      const runData = await runResp.json();
+      let parsed = null;
+      try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+      return res.status(200).json(parsed || { success: false, error: 'Failed to retrieve messages' });
     }
 
     if (action === 'contacts') {

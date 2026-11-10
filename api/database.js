@@ -51,13 +51,20 @@ module.exports = async (req, res) => {
     // 2. WhatsApp Logged Messages
     if (action === 'whatsapp') {
       try {
-        const waResp = await fetch(`${RAILWAY_WHATSAPP_URL}/messages`);
-        if (!waResp.ok) {
-          const errText = await waResp.text();
-          return res.status(waResp.status).json({ success: false, error: errText.slice(0, 200) });
-        }
-        const waData = await waResp.json();
-        return res.status(200).json(waData);
+        const phoneParam = req.body?.phone || req.query?.phone || '';
+        const limitParam = req.body?.limit || req.query?.limit || 50;
+        const safeQ = String(phoneParam).replace(/"/g, '\\"');
+        const safeLim = String(limitParam).replace(/[^0-9]/g, '');
+        const cmd = `python3 /root/mongo_tool.py get_whatsapp_messages "${safeQ}" "${safeLim}"`;
+        const runResp = await fetch(`${RAILWAY_RUNNER_URL}/execute`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${RUNNER_SECRET_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: cmd, timeout: 20000 })
+        });
+        const runData = await runResp.json();
+        let parsed = null;
+        try { parsed = JSON.parse(runData.stdout.trim()); } catch(e){ parsed = runData.stdout; }
+        return res.status(200).json(parsed || { success: true, count: 0, messages: [] });
       } catch(e) {
         return res.status(500).json({ success: false, error: e.message });
       }
